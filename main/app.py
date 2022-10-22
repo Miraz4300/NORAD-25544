@@ -7,12 +7,15 @@ import concurrent.futures
 import uuid
 import os
 import requests
+import redis.asyncio as redis
+import uvicorn
+from fastapi_limiter import FastAPILimiter
+from fastapi_limiter.depends import RateLimiter
 from dotenv import load_dotenv
-from fastapi import FastAPI, Request
+from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sse_starlette.sse import EventSourceResponse
-import uvicorn
 
 
 # Data handling for NORAD-25544
@@ -29,8 +32,8 @@ def surface(latitude: float, longitude: float) -> bool:
     blackbox = os.environ.get("blackbox")
     geocode = f'{os.environ.get("geocode")}?q={latitude}+{longitude}&key={blackbox}'
     response = requests.get(geocode, timeout=10).json()
-    is_water = response['results'][0]['components']['_category']
-    return is_water == 'natural/water'
+    water = response['results'][0]['components']['_category']
+    return water == 'natural/water'
 
 
 # Main NORAD-25544 Data Stream API
@@ -44,7 +47,14 @@ app.add_middleware(
 )
 
 
-@app.get('/v1/geolocation')
+@app.on_event("startup")
+async def startup():
+    """ Rate Limiting with Redis """
+    cache = redis.from_url("redis://localhost", encoding="utf-8", decode_responses=True)
+    await FastAPILimiter.init(cache)
+
+
+@app.get('/v1/geolocation', dependencies=[Depends(RateLimiter(times=1, seconds=60))])
 async def geolocation():
     """Get geodata for ISS"""
     geodata = orbit()
