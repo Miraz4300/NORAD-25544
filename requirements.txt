@@ -1,0 +1,6 @@
+fastapi==0.85.1
+requests==2.28.1
+sse-starlette==1.1.6
+starlette==0.20.4
+uuid==1.30
+uvicorn==0.19.0
