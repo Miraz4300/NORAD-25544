@@ -4,3 +4,4 @@ sse-starlette==1.1.6
 starlette==0.20.4
 uuid==1.30
 uvicorn==0.19.0
+gunicorn==20.1.0
