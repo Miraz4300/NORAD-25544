@@ -7,8 +7,10 @@ The NORAD Catalogue Number is a 5-digit satellite identification number that has
 Returns latitude, longitude, altitude, velocity, visibility and other related information about a satellite for a given point in time.
 
 ## :construction: In-Development
-- [ ] Rate Limiting
-- [ ] Redis Cache
+- [x] Rate Limiting
+- [x] Redis Cache
+- [x] New Relic Analytics
+- [ ] Identifier and Callback
 
 ### Made with:
 > 1. Microsoft Dev Container
